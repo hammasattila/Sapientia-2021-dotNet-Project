@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <appSettings>
+    <add key="server" value="host.docker.internal" />
+    <add key="database" value="Fitness" />
+    <add key="user" value="SA" />
+    <add key="pwd" value="F8Cc2bswB6H5Bk!u" />
+  </appSettings>
+</configuration>
