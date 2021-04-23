@@ -1,0 +1,71 @@
+@using System.Text.Json
+@inject IJSRuntime JSRuntime;
+
+<div class="card m-3">
+    <h4 class="card-header">Add client</h4>
+    <div class="card-body">
+        <EditForm EditContext="@editContext" OnValidSubmit="AddClientAsync" @onreset="InitModel">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <div class="form-group col-12 col-md-6">
+                    <label>Name</label>
+                    <InputText @bind-Value="client.Name" class="form-control" />
+                    <ValidationMessage For="@(() => client.Name)" />
+                </div>
+                <div class="form-group col-12 col-md-6">
+                    <label>Phone number</label>
+                    <InputText @bind-Value="client.Phone" class="form-control" />
+                    <ValidationMessage For="@(() => client.Phone)" />
+                </div>
+                    <div class="form-group col-12 col-md-6">
+                    <label>Email address</label>
+                    <InputText @bind-Value="client.Email" class="form-control" />
+                    <ValidationMessage For="@(() => client.Email)" />
+                </div>
+                <div class="form-group col-12 col-md-6">
+                    <label>Id card's serial number</label>
+                    <InputText @bind-Value="client.IdCardNr" class="form-control" />
+                    <ValidationMessage For="@(() => client.IdCardNr)" />
+                </div>
+                <div class="form-group col-12">
+                    <label>Notes</label>
+                    <InputTextArea @bind-Value="client.Notes" class="form-control" />
+                    <ValidationMessage For="@(() => client.Notes)" />
+                </div>
+            </div>
+            <ValidationSummary />
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary mr-1">Register</button>
+                <button type="reset" class="btn btn-secondary">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Client client;
+    private EditContext editContext;
+
+    FitnessDataService ds;
+
+    protected override void OnInitialized()
+    {
+        ds = new FitnessDataService();
+        this.InitModel();
+    }
+
+    private void InitModel() {
+        client = new Client();
+        editContext = new EditContext(client);        
+    }
+
+    private async void AddClientAsync()
+    {
+        var clientJson = JsonSerializer.Serialize(client, new JsonSerializerOptions { WriteIndented = true });
+        await JSRuntime.InvokeVoidAsync("alert", $"SUCCESS!! :-)\n\n{clientJson}");
+
+        await ds.TryAddClientAsync(client);
+        this.InitModel();
+    }
+}

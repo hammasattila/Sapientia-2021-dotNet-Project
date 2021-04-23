@@ -2,23 +2,9 @@
 
 ## Setup
 
-### Project
-
 ```PowerShell
 dotnet new gitignore
-
 dotnet new sln
-```
-
-### Blazor Web Assambly Application
-
-```PowerShell
-dotnet new blazorwasm -n BlazorApp
-dotnet sln add .\BlazorApp\BlazorApp.csproj
-# dotnet add .\BlazorApp\BlazorApp.csproj reference StringLibrary/StringLibrary.csproj
-# This package at the time of creating the application was available in prerelase form.
-cd .\BlazorApp
-dotnet add package Microsoft.AspNetCore.Components.Web.Extensions --prerelease
 ```
 
 ### MSSQL Server
@@ -46,10 +32,14 @@ GO
 Now you have created the database. Create the schemas.
 
 ```SQL
+DROP TABLE IF EXISTS [Fitness].[dbo].[Entries];
+DROP TABLE IF EXISTS [Fitness].[dbo].[ClientPasses];
 DROP TABLE IF EXISTS [Fitness].[dbo].[Gyms];
+DROP TABLE IF EXISTS [Fitness].[dbo].[Clients];
+
 CREATE TABLE [Fitness].[dbo].[Gyms] (
     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [Name] VARCHAR(128) NOT NULL,
+    [Name] VARCHAR(64) NOT NULL,
     [IsDeleted] BIT NOT NULL DEFAULT(0)
 );
 
@@ -57,8 +47,8 @@ DROP TABLE IF EXISTS [Fitness].[dbo].[Passes];
 CREATE TABLE [Fitness].[dbo].[Passes]
 (
     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [Name] VARCHAR(128) NOT NULL DEFAULT(''),
-    [Price] DECIMAL(10,2) NOT NULL DEFAULT(0),
+    [Name] VARCHAR(64) NOT NULL DEFAULT(''),
+    [Price] DECIMAL(6,2) NOT NULL DEFAULT(0),
     [ValidForDays] INT not NULL DEFAULT(0),
     [ValidForEnteries] INT NOT NULL DEFAULT(0),
     [ValidForGymId] INT NOT NULL DEFAULT(0),
@@ -68,11 +58,10 @@ CREATE TABLE [Fitness].[dbo].[Passes]
     [IsDeleted] BIT NOT NULL DEFAULT(0)
 );
 
-DROP TABLE IF EXISTS [Fitness].[dbo].[Clients];
 CREATE TABLE [Fitness].[dbo].[Clients]
 (
     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [Name] VARCHAR(128) NOT NULL,
+    [Name] VARCHAR(64) NOT NULL,
     [Phone] VARCHAR(16) NOT NULL,
     [Email] VARCHAR(128) NOT NULL,
     [IdCardNr] VARCHAR(16) NOT NULL,
@@ -84,7 +73,6 @@ CREATE TABLE [Fitness].[dbo].[Clients]
     [Notes] VARCHAR(256) DEFAULT NULL
 );
 
-DROP TABLE IF EXISTS [Fitness].[dbo].[Entries];
 CREATE TABLE [Fitness].[dbo].[Entries]
 (
     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
@@ -97,7 +85,6 @@ CREATE TABLE [Fitness].[dbo].[Entries]
     [EntryDate] DATETIME NOT NULL DEFAULT(getdate())
 );
 
-DROP TABLE IF EXISTS [Fitness].[dbo].[ClientPasses];
 CREATE TABLE [Fitness].[dbo].[ClientPasses] (
     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [ClientId] INT NOT NULL
@@ -105,12 +92,27 @@ CREATE TABLE [Fitness].[dbo].[ClientPasses] (
     [PassId] INT NOT NULL
         FOREIGN KEY REFERENCES [Fitness].[dbo].[Passes](Id),
     [DateOfPurchase] DATETIME NOT NULL DEFAULT(getdate()),
-    [Barcode] VARCHAR(64) UNIQUE NOT NULL,
-    [SellingPrice] DECIMAL(10,2) NOT NULL,
+    [Barcode] VARCHAR(7) UNIQUE NOT NULL,
+    [SellingPrice] DECIMAL(6,2) NOT NULL,
     [NumberOfEnteries] INT NOT NULL DEFAULT(0),
     [FirstUsedAt] INT DEFAULT(NULL),
     [IsValid] BIT NOT NULL DEFAULT(1),
 );
+```
+
+### Blazor Web Application
+
+```PowerShell
+dotnet new blazorserver -n BlazorApp
+dotnet sln add .\BlazorApp\BlazorApp.csproj
+cd .\BlazorApp
+dotnet add package Microsoft.AspNetCore.Identity.UI
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+# This package at the time of creating the application was available in prerelase form.
+dotnet add package Microsoft.AspNetCore.Components.Web.Extensions --prerelease
 ```
 
 ### DataLib
@@ -118,19 +120,24 @@ CREATE TABLE [Fitness].[dbo].[ClientPasses] (
 ```PowerShell
 dotnet new classlib -n DataAccessLayer
 dotnet sln add .\DataAccessLayer\DataAccessLayer.csproj
+dotnet add .\BlazorApp\BlazorApp.csproj reference DataAccessLayer/DataAccessLayer.csproj
 
 
 cd .\DataAccessLayer
+dotnet add package Microsoft.EntityFrameworkCore
 dotnet add package Microsoft.EntityFrameworkCore.Design
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package System.Configuration.ConfigurationManager
 dotnet tool install --global dotnet-ef
 
-dotnet ef dbcontext scaffold "server='host.docker.internal';port=1433;database=Fitness;user=sa;pwd='F8Cc2bswB6H5Bk!u;'" "Microsoft.EntityFrameworkCore.SqlServer" -o .\Models -f
+dotnet ef dbcontext scaffold "server='host.docker.internal';database=Fitness;user=sa;pwd='F8Cc2bswB6H5Bk!u;'" "Microsoft.EntityFrameworkCore.SqlServer" -o .\Models -f
 ```
 
 NuGet Packages:
 [Microsoft.EntityFrameworkCore.Design](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/),
 [Microsoft.EntityFrameworkCore.SqlServer](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer/6.0.0-preview.3.21201.2).
+[System.Configuration.ConfigurationManager](https://www.nuget.org/packages/System.Configuration.ConfigurationManager/6.0.0-preview.3.21201.4)
+
 CLI Tools:
 [Microsoft.EntityFrameworkCore.Tools](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools/6.0.0-preview.3.21201.2).
 
@@ -139,4 +146,13 @@ CLI Tools:
 ## Resources
 
 [Build a web app with Blazor WebAssembly and Visual Studio Code](https://docs.microsoft.com/en-us/learn/modules/build-blazor-webassembly-visual-studio-code/)
+
 [Create a .NET class library using Visual Studio Code](https://docs.microsoft.com/en-us/dotnet/core/tutorials/library-with-visual-studio-code)
+
+[How to Access MySQL Database with Entity Framework Core](https://youtu.be/N10QW_AIOnI)
+
+[Blazor WebAssembly - Form Validation Example](https://jasonwatmore.com/post/2020/07/31/blazor-webassembly-form-validation-example) [[Github]](https://github.com/cornflourblue/blazor-webassembly-form-validation)
+
+[How to: Pad a Number with Leading Zeros](https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-pad-a-number-with-leading-zeros)
+
+[A Demonstration of Simple Server-side Blazor Cookie Authentication](https://blazorhelpwebsite.com/ViewBlogPost/36)

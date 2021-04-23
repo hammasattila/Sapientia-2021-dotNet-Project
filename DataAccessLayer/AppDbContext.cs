@@ -1,17 +1,18 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using DataAccessLayer.Models;
 #nullable disable
 
-namespace DataAccessLayer.Models
+namespace DataAccessLayer
 {
-    public partial class FitnessContext : DbContext
+    public partial class AppDbContext : DbContext
     {
-        public FitnessContext()
+        public AppDbContext()
         {
         }
 
-        public FitnessContext(DbContextOptions<FitnessContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }

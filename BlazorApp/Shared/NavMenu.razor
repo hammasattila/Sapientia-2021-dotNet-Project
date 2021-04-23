@@ -7,25 +7,26 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
+        @foreach (var item in menuItems)
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="@item.path" Match="NavLinkMatch.All">
+                    <span class="oi oi-@item.icon" aria-hidden="true"></span> @item.label
+                </NavLink>
+            </li>
+        }
     </ul>
 </div>
 
 @code {
+    private (string icon, string path, string label)[] menuItems = {
+        ("dashboard", "", "Dashboard"),
+        ("people", "clients", "Clients"),
+        ("layers", "passes", "Passes"),
+        ("map", "gyms", "Gyms"),
+        ("info", "about", "About")
+    };
+
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
