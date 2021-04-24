@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BlazorApp.Data;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 
 namespace BlazorApp
 {
@@ -28,11 +31,12 @@ namespace BlazorApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>();
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<AppDbContext>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddSingleton<FitnessDataService>();
-            services.AddSingleton<WeatherForecastService>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,8 +58,12 @@ namespace BlazorApp
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

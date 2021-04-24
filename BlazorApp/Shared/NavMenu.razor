@@ -7,25 +7,32 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
-        @foreach (var item in menuItems)
-        {
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="@item.path" Match="NavLinkMatch.All">
-                    <span class="oi oi-@item.icon" aria-hidden="true"></span> @item.label
-                </NavLink>
-            </li>
-        }
+        <AuthorizeView>
+            <Authorized>
+                @foreach (var item in menuItems)
+                {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="@item.path" Match="NavLinkMatch.All">
+                        <span class="oi oi-@item.icon" aria-hidden="true"></span> @item.label
+                    </NavLink>
+                </li>
+                }
+            </Authorized>
+            <NotAuthorized>
+
+            </NotAuthorized>
+        </AuthorizeView>
     </ul>
 </div>
 
 @code {
     private (string icon, string path, string label)[] menuItems = {
-        ("dashboard", "", "Dashboard"),
-        ("people", "clients", "Clients"),
-        ("layers", "passes", "Passes"),
-        ("map", "gyms", "Gyms"),
-        ("info", "about", "About")
-    };
+("dashboard", "", "Dashboard"),
+("people", "clients", "Clients"),
+("layers", "passes", "Passes"),
+("map", "gyms", "Gyms"),
+("info", "about", "About")
+};
 
     private bool collapseNavMenu = true;
 

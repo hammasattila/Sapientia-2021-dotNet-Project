@@ -16,6 +16,8 @@ You may want to change the password: **-e 'SA_PASSWORD=...'**.
 docker run --name mssql_server -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=F8Cc2bswB6H5Bk!u' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 
+#### Example for creating database inside the container
+
 Inside the Docker conteiner run the sqlcmd tool
 
 ```sh
@@ -100,7 +102,7 @@ CREATE TABLE [Fitness].[dbo].[ClientPasses] (
 );
 ```
 
-### Blazor Web Application
+### Blazor Web Server Application
 
 ```PowerShell
 dotnet new blazorserver -n BlazorApp
@@ -130,7 +132,12 @@ dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add package System.Configuration.ConfigurationManager
 dotnet tool install --global dotnet-ef
 
-dotnet ef dbcontext scaffold "server='host.docker.internal';database=Fitness;user=sa;pwd='F8Cc2bswB6H5Bk!u;'" "Microsoft.EntityFrameworkCore.SqlServer" -o .\Models -f
+# If you want to generate the model from the database.
+# dotnet ef dbcontext scaffold "server='host.docker.internal';database=Fitness;user=sa;pwd='F8Cc2bswB6H5Bk!u;'" "Microsoft.EntityFrameworkCore.SqlServer" -o .\Models
+# Migrating the database
+dotnet-ef migrations add "Init"
+# Your connection string may be different.
+dotnet ef database update --connection "server='host.docker.internal';database=Fitness;user=SA;pwd='F8Cc2bswB6H5Bk!u';"
 ```
 
 NuGet Packages:

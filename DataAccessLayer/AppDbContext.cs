@@ -1,19 +1,20 @@
 ﻿using System;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 using DataAccessLayer.Models;
+using Microsoft.AspNetCore.Identity;
 #nullable disable
 
 namespace DataAccessLayer
 {
-    public partial class AppDbContext : DbContext
+    public partial class AppDbContext : IdentityDbContext
     {
         public AppDbContext()
         {
         }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
@@ -31,12 +32,15 @@ namespace DataAccessLayer
                 string database = ConfigurationManager.AppSettings.Get("database");
                 string user = ConfigurationManager.AppSettings.Get("user");
                 string pwd = ConfigurationManager.AppSettings.Get("pwd");
-                optionsBuilder.UseSqlServer($"server='{server}';database={database};user={user};pwd='{pwd}';");
+                string connectionString = $"server='{server}';database={database};user={user};pwd='{pwd}';";
+                optionsBuilder.UseSqlServer(connectionString);
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
             modelBuilder.Entity<Client>(entity =>
