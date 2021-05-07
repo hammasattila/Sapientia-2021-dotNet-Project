@@ -1,0 +1,150 @@
+@using Microsoft.AspNetCore.Identity
+@inject IJSRuntime JSRuntime;
+@inject UserManager<IdentityUser> UserManager
+
+@if (User.Id != "")
+{
+    <p>Id: @User.Id</p>
+    <p> Username: @User.UserName</p>
+}
+<div class="form-row">
+    @if (User.Id == "")
+    {
+        <div class="form-group col-12 col-md-6">
+            <label>Username</label>
+            <input class="form-control" type="email" placeholder="Username" @bind="User.UserName" />
+        </div>
+        <div class="form-group col-12 col-md-6">
+            <label>Email</label>
+            <input class="form-control" type="email" placeholder="Email" @bind="User.Email" />
+        </div>
+    }
+
+    <div class="form-group col-12 col-md-6">
+        <label>Password</label>
+        <input class="form-control" type="password" placeholder="Password" @bind="User.PasswordHash" />
+    </div>
+    <div class="form-group col-12 col-md-6">
+        <label>Role</label>
+        <select class="form-control" @bind="@UserRole">
+            <option value="">
+                None
+            </option>
+            @foreach (var role in Roles)
+            {
+                <option value="@role">
+                    @role
+                </option>
+            }
+        </select>
+    </div>
+    <!-- Button to save the user -->
+    <button class="btn btn-primary" @onclick="SaveUser">Save</button>
+    <button class="btn btn-danger" @onclick="DeleteUser">Delete</button>
+</div>
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public IdentityUser User { get; set; }
+    [Parameter] public List<string> Roles { get; set; }
+    [Parameter] public string UserRole { get; set; }
+
+    private async Task SaveUser()
+    {
+        string error = "";
+        try
+        {
+            if (User.Id != "")
+            {
+                var user = await UserManager.FindByIdAsync(User.Id);
+                user.Email = User.Email;
+                await UserManager.UpdateAsync(user);
+                if (!String.IsNullOrWhiteSpace(User.PasswordHash))
+                {
+                    var restToken = await UserManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await UserManager.ResetPasswordAsync(user, restToken, User.PasswordHash);
+
+                    if (!result.Succeeded)
+                    {
+                        if (result.Errors.FirstOrDefault() != null)
+                        {
+                            error = result.Errors.FirstOrDefault().Description;
+                        }
+                        else
+                        {
+                            error = "Update error";
+                        }
+
+                        await JSRuntime.InvokeVoidAsync("alert", error);
+                        return;
+                    }
+                }
+
+                var roles = await UserManager.GetRolesAsync(user);
+                await UserManager.RemoveFromRolesAsync(user, roles);
+
+                if (!String.IsNullOrWhiteSpace(UserRole))
+                {
+                    await UserManager.AddToRoleAsync(user, UserRole);
+                }
+            }
+            else
+            {
+                var newUser = new IdentityUser { UserName = User.Email, Email = User.Email };
+                var result = await UserManager.CreateAsync(newUser, User.PasswordHash);
+                if (!result.Succeeded)
+                {
+                    if (result.Errors.FirstOrDefault() != null)
+                    {
+                        error = result.Errors.FirstOrDefault().Description;
+                    }
+                    else
+                    {
+                        error = "Create error";
+                    }
+
+                    await JSRuntime.InvokeVoidAsync("alert", error);
+                    return;
+                }
+
+                if (!String.IsNullOrWhiteSpace(UserRole))
+                {
+                    await UserManager.AddToRoleAsync(newUser, UserRole);
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            error = e.GetBaseException().Message;
+        }
+
+        if (!String.IsNullOrEmpty(error))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", error);
+        }
+        else
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+
+    private async Task DeleteUser()
+    {
+        string error = null;
+
+        var user = await UserManager.FindByIdAsync(User.Id);
+        if (user != null)
+        {
+            await UserManager.DeleteAsync(user);
+        }
+
+        if (!String.IsNullOrEmpty(error))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", error);
+        }
+        else
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+}

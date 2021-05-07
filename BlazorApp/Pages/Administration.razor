@@ -1,0 +1,53 @@
+@page "/administration"
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<IdentityUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+<h3>Administration</h3>
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <UserListComponent Users="Users" EditUserCallback="EditUser" />
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not an Administrator</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    [CascadingParameter] public IModalService ModalService { get; set; }
+    private List<string> Roles { get; set; }
+    public List<IdentityUser> Users { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.GetUsers();
+        this.Roles = RoleManager.Roles.Select(role => role.Name).ToList();
+    }
+
+    private void GetUsers()
+    {
+        Users = UserManager.Users.Select(user => new IdentityUser
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+        }).ToList();
+        StateHasChanged();
+    }
+
+    private async void EditUser(IdentityUser user)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("User", user);
+        parameters.Add("Roles", this.Roles);
+        string currentRole = (await UserManager.GetRolesAsync(user)).FirstOrDefault();
+        parameters.Add("UserRole", currentRole);
+
+        if (!(await ModalService.Show<UserEditComponent>("Edit user", parameters).Result).Cancelled)
+        {
+            this.GetUsers();
+        }
+    }
+}

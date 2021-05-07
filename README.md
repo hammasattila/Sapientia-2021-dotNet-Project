@@ -152,14 +152,18 @@ CLI Tools:
 
 ## Resources
 
-[Build a web app with Blazor WebAssembly and Visual Studio Code](https://docs.microsoft.com/en-us/learn/modules/build-blazor-webassembly-visual-studio-code/)
+1. [Build a web app with Blazor WebAssembly and Visual Studio Code](https://docs.microsoft.com/en-us/learn/modules/build-blazor-webassembly-visual-studio-code/)
 
-[Create a .NET class library using Visual Studio Code](https://docs.microsoft.com/en-us/dotnet/core/tutorials/library-with-visual-studio-code)
+2. [Create a .NET class library using Visual Studio Code](https://docs.microsoft.com/en-us/dotnet/core/tutorials/library-with-visual-studio-code)
 
-[How to Access MySQL Database with Entity Framework Core](https://youtu.be/N10QW_AIOnI)
+3. [How to Access MySQL Database with Entity Framework Core](https://youtu.be/N10QW_AIOnI)
 
-[Blazor WebAssembly - Form Validation Example](https://jasonwatmore.com/post/2020/07/31/blazor-webassembly-form-validation-example) [[Github]](https://github.com/cornflourblue/blazor-webassembly-form-validation)
+4. [Blazor WebAssembly - Form Validation Example](https://jasonwatmore.com/post/2020/07/31/blazor-webassembly-form-validation-example) [[Github]](https://github.com/cornflourblue/blazor-webassembly-form-validation)
 
-[How to: Pad a Number with Leading Zeros](https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-pad-a-number-with-leading-zeros)
+5. [How to: Pad a Number with Leading Zeros](https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-pad-a-number-with-leading-zeros)
 
-[A Demonstration of Simple Server-side Blazor Cookie Authentication](https://blazorhelpwebsite.com/ViewBlogPost/36)
+6. [A Demonstration of Simple Server-side Blazor Cookie Authentication](https://blazorhelpwebsite.com/ViewBlogPost/36)
+
+7. [**Microsoft bulshit**: email should be checked with email column](https://stackoverflow.com/questions/50089448/cant-login-with-created-user-in-net-core-2-0)
+
+8. [A Simple Blazor User and Role Manager](https://blazorhelpwebsite.com/ViewBlogPost/21)

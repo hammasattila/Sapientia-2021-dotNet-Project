@@ -4,14 +4,16 @@ using System.Threading.Tasks;
 using DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer{
-    public class FitnessDataService 
+namespace DataAccessLayer
+{
+    public class FitnessDataService
     {
+        #region Clients
         public async Task<bool> TryAddClientAsync(Client client)
         {
 
             using (var db = new AppDbContext())
-            {   
+            {
                 client.Barcode = (db.Clients.Count() + 1).ToString("D7");
                 var res = await db.Clients.AddAsync(client);
                 db.SaveChanges();
@@ -29,5 +31,6 @@ namespace DataAccessLayer{
                     .ToListAsync();
             }
         }
+        #endregion
     }
 }
