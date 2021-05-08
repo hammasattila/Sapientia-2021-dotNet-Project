@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 #nullable disable
 
@@ -14,7 +15,7 @@ namespace DataAccessLayer.Models
         }
 
         public int Id { get; set; }
-        public string Name { get; set; }
+        [Required] public string Name { get; set; }
         public decimal Price { get; set; }
         public int ValidForDays { get; set; }
         public int ValidForEnteries { get; set; }

@@ -1,0 +1,41 @@
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">Passes</h4>
+    @if (Passes is null)
+    {
+      <p class="text-center">Fetching pass types</p>
+    }
+    else
+    {
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var pass in Passes)
+          {
+            <tr class="@(pass.IsDeleted ? "bg-danger" : "" )">
+              <td>@pass.Id</td>
+              <td>@pass.Name</td>
+              <td>@pass.Price</td>
+              <td>
+                <button class="btn btn-primary" @onclick="(() => EditPassCallback.InvokeAsync(pass))"><span class="oi oi-edit" aria-hidden="true"></span>Edit</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    <button class="btn btn-success" @onclick="(() => EditPassCallback.InvokeAsync(new Pass()))">Add Membership Type</button>
+  </div>
+</div>
+
+@code {
+  [Parameter] public List<Pass> Passes { get; set; }
+  [Parameter] public EventCallback<Pass> EditPassCallback { get; set; }
+}

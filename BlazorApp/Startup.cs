@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace BlazorApp
 {
@@ -31,7 +32,14 @@ namespace BlazorApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>();
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddDefaultIdentity<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+            })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
             services.AddRazorPages();
@@ -70,10 +78,10 @@ namespace BlazorApp
                 endpoints.MapFallbackToPage("/_Host");
             });
 
-            await this.DatabaseRoles(app.ApplicationServices);
+            await this.InitializeRolesAndUsers(app.ApplicationServices);
         }
 
-        private async Task DatabaseRoles(IServiceProvider serviceProvider)
+        private async Task InitializeRolesAndUsers(IServiceProvider serviceProvider)
         {
             using (var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
@@ -94,23 +102,28 @@ namespace BlazorApp
                             throw new Exception($"Failed to add '{roleName}' role to database.");
                         }
                     }
+                }
 
-                    var users = await userManager.GetUsersInRoleAsync(roleName);
-                    if (users.Count < 1)
+                var username = ConfigurationManager.AppSettings.Get("default_admin_usr");
+                if (!String.IsNullOrEmpty(username))
+                {
+                    if ((await userManager.FindByNameAsync(username)) == null)
                     {
-                        var userName = $"{roleName.ToLower()}@fitness.com";
-                        var user = new IdentityUser { UserName = userName, Email = userName };
-                        var defaultPassword = "Pa$$wordIs0123";
-                        if(!(await userManager.CreateAsync(user,defaultPassword)).Succeeded)
+                        var defaultPassword = ConfigurationManager.AppSettings.Get("default_admin_pwd") ?? "admin";
+                        var user = new IdentityUser { UserName = username, Email = username };
+                        if (!(await userManager.CreateAsync(user, defaultPassword)).Succeeded)
                         {
-                            throw new Exception($"Failed to add '{userName}' user to database.");
-                        }
-                        if(!(await userManager.AddToRoleAsync(user, roleName)).Succeeded)
-                        {
-                            throw new Exception($"Failed to add '{roleName}' to '{userName}' user.");
+                            throw new Exception($"Failed to add '{username}' user to database.");
                         }
                     }
-
+                    if ((await userManager.GetUsersInRoleAsync("Admin")).Count == 0)
+                    {
+                        var user = await userManager.FindByNameAsync(username);
+                        if (!(await userManager.AddToRoleAsync(user, "Admin")).Succeeded)
+                        {
+                            throw new Exception($"Failed to add '{username}' user to 'Admin' role.");
+                        }
+                    }
                 }
             }
         }

@@ -10,6 +10,9 @@ namespace DataAccessLayer
 {
     public partial class AppDbContext : IdentityDbContext
     {
+
+        public string ConnectionString { get; set; }
+
         public AppDbContext()
         {
         }
@@ -28,12 +31,15 @@ namespace DataAccessLayer
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string server = ConfigurationManager.AppSettings.Get("server");
-                string database = ConfigurationManager.AppSettings.Get("database");
-                string user = ConfigurationManager.AppSettings.Get("user");
-                string pwd = ConfigurationManager.AppSettings.Get("pwd");
-                string connectionString = $"server='{server}';database={database};user={user};pwd='{pwd}';";
-                optionsBuilder.UseSqlServer(connectionString);
+                if (String.IsNullOrEmpty(this.ConnectionString))
+                {
+                    string server = ConfigurationManager.AppSettings.Get("server");
+                    string database = ConfigurationManager.AppSettings.Get("database");
+                    string user = ConfigurationManager.AppSettings.Get("user");
+                    string pwd = ConfigurationManager.AppSettings.Get("pwd");
+                    this.ConnectionString = $"server='{server}';database={database};user={user};pwd='{pwd}';";
+                }
+                optionsBuilder.UseSqlServer(this.ConnectionString);
             }
         }
 

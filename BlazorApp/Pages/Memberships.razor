@@ -1,0 +1,40 @@
+@page "/memberships"
+@using Microsoft.AspNetCore.Authorization;
+@inject FitnessDataService DataService;
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <PassListComponent Passes="Passes" EditPassCallback="EditPass" />
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not an Administrator</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    [CascadingParameter] public IModalService ModalService { get; set; }
+    public List<Pass> Passes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.GetPasses();
+    }
+
+    private async Task GetPasses()
+    {
+        Passes = await DataService.GetPassesAsync();
+        StateHasChanged();
+    }
+
+    private async Task EditPass(Pass pass)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Membership", pass);
+
+        if (!(await ModalService.Show<PassEditComponent>("Edit pass", parameters).Result).Cancelled)
+        {
+            await this.GetPasses();
+        }
+    }
+}

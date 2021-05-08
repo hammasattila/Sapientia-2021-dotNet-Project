@@ -1,0 +1,120 @@
+@inject FitnessDataService DataService;
+@inject IJSRuntime JSRuntime;
+
+<EditForm EditContext="@Context" OnValidSubmit="SaveMembership" @onreset="InitModel">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-12">
+            <label>Name</label>
+            <InputText @bind-Value="TempMembership.Name" class="form-control" />
+            <ValidationMessage For="@(() => TempMembership.Name)" />
+        </div>
+        <div class="form-group col-12 col-md-6">
+            <label>Price</label>
+            <InputNumber @bind-Value="TempMembership.Price" class="form-control" />
+            <ValidationMessage For="@(() => TempMembership.Price)" />
+        </div>
+        <div class="form-group col-12 col-md-6">
+            <label>Valid for # days</label>
+            <InputNumber @bind-Value="TempMembership.ValidForDays" class="form-control" />
+            <ValidationMessage For="@(() => TempMembership.ValidForDays)" />
+        </div>
+        <div class="form-group col-12 col-md-6">
+            <label>Valid for # enteries</label>
+            <InputNumber @bind-Value="TempMembership.ValidForEnteries" class="form-control" />
+            <ValidationMessage For="@(() => TempMembership.ValidForEnteries)" />
+        </div>
+        <div class="form-group col-12 col-md-6">
+            <label>Valid # per day</label>
+            <InputNumber @bind-Value="TempMembership.ValidPerDay" class="form-control" />
+            <ValidationMessage For="@(() => TempMembership.ValidPerDay)" />
+        </div>
+    </div>
+    <ValidationSummary />
+    <div class="text-center">
+        <button type="submit" class="btn btn-success mr-1">Save</button>
+        <button type="reset" class="btn btn-secondary mr-1">Reset</button>
+        @if (TempMembership.Id != 0)
+        {
+            @if (TempMembership.IsDeleted)
+            {
+                <button type="button" class="btn btn-primary mr-1" @onclick="UnDeleteMembership">Restore</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-danger mr-1" @onclick="DeleteMembership">Delete</button>
+            }
+        }
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public Pass Membership { get; set; }
+
+    private Pass TempMembership { get; set; }
+
+    private EditContext Context { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.InitModel();
+    }
+
+    private void InitModel()
+    {
+        TempMembership = new Pass()
+        {
+            Id = Membership.Id,
+            Name = Membership.Name,
+            Price = Membership.Price,
+            ValidForDays = Membership.ValidForDays,
+            ValidForEnteries = Membership.ValidForEnteries,
+            ValidForGymId = Membership.ValidForGymId,
+            ValidFrom = Membership.ValidFrom,
+            ValidUntil = Membership.ValidUntil,
+            ValidPerDay = Membership.ValidPerDay,
+            IsDeleted = Membership.IsDeleted
+        };
+
+        this.Context = new EditContext(TempMembership);
+    }
+
+    private async Task SaveMembership()
+    {
+        string error = null;
+
+        if (TempMembership.Id != 0)
+        {
+            await DataService.UpdatePassAsync(TempMembership);
+        }
+        else
+        {
+            if (!await DataService.TryAddPassAsync(TempMembership))
+            {
+                error = "Create error";
+            }
+        }
+
+        if (!String.IsNullOrEmpty(error))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", error);
+        }
+        else
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+
+    private async Task DeleteMembership()
+    {
+        TempMembership.IsDeleted = true;
+        await this.SaveMembership();
+    }
+
+        private async Task UnDeleteMembership()
+    {
+        TempMembership.IsDeleted = false;
+        await this.SaveMembership();
+    }
+}

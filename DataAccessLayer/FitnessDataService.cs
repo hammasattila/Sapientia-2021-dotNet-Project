@@ -32,5 +32,42 @@ namespace DataAccessLayer
             }
         }
         #endregion
+
+        #region Passes
+        public async Task<List<Pass>> GetPassesAsync()
+        {
+            using (var db = new AppDbContext())
+            {
+                return await db.Passes
+                    .OrderBy(pass => pass.IsDeleted)
+                    .ThenBy(pass => pass.Name)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<bool> TryAddPassAsync(Pass pass)
+        {
+
+            using (var db = new AppDbContext())
+            {
+                var res = await db.Passes.AddAsync(pass);
+                db.SaveChanges();
+            }
+
+            return true;
+        }
+
+        public async Task<bool> UpdatePassAsync(Pass pass)
+        {
+
+            using (var db = new AppDbContext())
+            {
+                var res = db.Passes.Update(pass);
+                db.SaveChanges();
+            }
+
+            return true;
+        }
+        #endregion
     }
 }
