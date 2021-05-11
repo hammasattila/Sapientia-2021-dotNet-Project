@@ -25,7 +25,9 @@
               <td>@user.UserName</td>
               <td>@user.Email</td>
               <td>
-                <button class="btn btn-primary" @onclick="(() => EditUserCallback.InvokeAsync(user))">Edit</button>
+                <button class="btn btn-primary" @onclick="(() => EditUserCallback.InvokeAsync(user))">
+                  <span class="mr-2 oi oi-pencil" aria-hidden="true"></span>Edit
+                </button>
               </td>
             </tr>
           }

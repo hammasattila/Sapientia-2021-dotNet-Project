@@ -29,20 +29,38 @@
             <InputNumber @bind-Value="TempMembership.ValidPerDay" class="form-control" />
             <ValidationMessage For="@(() => TempMembership.ValidPerDay)" />
         </div>
+            <div class="form-group col-12">
+        <label>Role</label>
+        <select class="form-control" @bind="@TempMembership.ValidForGymId">
+            <option value="0">
+                None
+            </option>
+            @foreach (var gym in Gyms ?? Enumerable.Empty<Gym>())
+            {
+                <option value="@gym.Id">
+                    @gym.Name
+                </option>
+            }
+        </select>
+    </div>
     </div>
     <ValidationSummary />
     <div class="text-center">
-        <button type="submit" class="btn btn-success mr-1">Save</button>
-        <button type="reset" class="btn btn-secondary mr-1">Reset</button>
+        <button type="submit" class="btn btn-success mr-2">Save</button>
+        <button type="reset" class="btn btn-secondary mr-2">Reset</button>
         @if (TempMembership.Id != 0)
         {
             @if (TempMembership.IsDeleted)
             {
-                <button type="button" class="btn btn-primary mr-1" @onclick="UnDeleteMembership">Restore</button>
+                <button type="button" class="btn btn-primary mr-2" @onclick="UnDeleteMembership">
+                    <span class="mr-2 oi oi-reload" aria-hidden="true"></span>Restore
+                </button>
             }
             else
             {
-                <button type="button" class="btn btn-danger mr-1" @onclick="DeleteMembership">Delete</button>
+                <button type="button" class="btn btn-danger mr-2" @onclick="DeleteMembership">
+                    <span class="oi oi-trash" aria-hidden="true"></span>Restore
+                </button>
             }
         }
     </div>
@@ -52,13 +70,16 @@
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
     [Parameter] public Pass Membership { get; set; }
 
+    private List<Gym> Gyms { get; set; }
+
     private Pass TempMembership { get; set; }
 
     private EditContext Context { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         this.InitModel();
+        this.Gyms = await DataService.GetGymsAsync();
     }
 
     private void InitModel()

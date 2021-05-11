@@ -1,0 +1,38 @@
+@page "/gyms"
+@inject FitnessDataService DataService;
+
+<AuthorizeView Roles="Admin, User">
+    <Authorized>
+        <GymListComponent Gyms="Gyms" EditGymCallback="EditGym" />
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not an Administrator</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    List<Gym> Gyms { get; set; }
+    [CascadingParameter] public IModalService ModalService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.GetGyms();
+    }
+
+    private async Task GetGyms()
+    {
+        Gyms = await DataService.GetGymsAsync();
+        StateHasChanged();
+    }
+
+    private async Task EditGym(Gym gym)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Gym", gym);
+
+        if (!(await ModalService.Show<GymEditComponent>(gym.Id == 0 ? "Add gym" :"Edit gym", parameters).Result).Cancelled)
+        {
+            await this.GetGyms();
+        }
+    }
+}

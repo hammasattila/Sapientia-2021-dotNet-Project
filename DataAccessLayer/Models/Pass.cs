@@ -16,10 +16,13 @@ namespace DataAccessLayer.Models
 
         public int Id { get; set; }
         [Required] public string Name { get; set; }
-        public decimal Price { get; set; }
+        
+        [Range(.0, Double.MaxValue, ErrorMessage = "Price must be a positive value!")]
+        [Required] public decimal Price { get; set; }
         public int ValidForDays { get; set; }
         public int ValidForEnteries { get; set; }
         public int ValidForGymId { get; set; }
+        public Gym ValidForGym  { get; set; }
         public int ValidFrom { get; set; }
         public int ValidUntil { get; set; }
         public int ValidPerDay { get; set; }

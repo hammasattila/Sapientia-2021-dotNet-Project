@@ -39,8 +39,10 @@
         </select>
     </div>
     <!-- Button to save the user -->
-    <button class="btn btn-primary" @onclick="SaveUser">Save</button>
-    <button class="btn btn-danger" @onclick="DeleteUser">Delete</button>
+    <button class="mr-2 btn btn-primary" @onclick="SaveUser">Save</button>
+    <button class="mr-2 btn btn-danger" @onclick="DeleteUser">
+        <span class="mr-2 oi oi-trash" aria-hidden="true"></span>Restore
+    </button>
 </div>
 @code {
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }

@@ -33,7 +33,46 @@ namespace DataAccessLayer
         }
         #endregion
 
+        #region Gyms
+        public async Task<List<Gym>> GetGymsAsync()
+        {
+            using (var db = new AppDbContext())
+            {
+                return await db.Gyms
+                    .OrderBy(gym => gym.IsDeleted)
+                    .ThenBy(gym => gym.Name)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<bool> TryAddGymAsync(Gym gym)
+        {
+
+            using (var db = new AppDbContext())
+            {
+                var res = await db.Gyms.AddAsync(gym);
+                db.SaveChanges();
+            }
+
+            return true;
+        }
+
+        public Task<bool> UpdateGymAsync(Gym gym)
+        {
+
+            using (var db = new AppDbContext())
+            {
+                var res = db.Gyms.Update(gym);
+                db.SaveChanges();
+            }
+
+            return Task.FromResult(true);
+        }
+
+        #endregion
+
         #region Passes
+
         public async Task<List<Pass>> GetPassesAsync()
         {
             using (var db = new AppDbContext())
