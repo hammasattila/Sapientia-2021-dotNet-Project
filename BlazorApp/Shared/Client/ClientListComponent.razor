@@ -1,43 +1,63 @@
 @inject FitnessDataService DataService
 
 <div class="card">
-  <div class="card-body">
-    <h4 class="card-title">Client list</h4>
-    <table class="table table-hover">
-      <thead>
-        <th>Name</th>
-        <th>Barcode</th>
-        <th>Actions</th>
-      </thead>
-      <tbody>
-        @foreach (var client in Clients)
-        {
-          <tr data-toggle="collapse" class="clickable" onclick="document.getElementById('client_@(client.Id)_detail').classList.toggle('collapse');">
-            <td>@client.Name</td>
-            <td>@client.Barcode</td>
-            <td>TODO</td>
-          </tr>
-          <tr>
-            <td class="p-0" colspan="3">
-              <div id="client_@(client.Id)_detail" class="collapse m-3">
-                TODO DEATILS
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-    <a href="#" class="btn btn-primary">Go somewhere</a>
-  </div>
+    <div class="card-body">
+        <h4 class="card-title">Client list</h4>
+        <table class="table table-hover">
+            <thead>
+                <th>Name</th>
+                <th>Barcode</th>
+                <th></th>
+            </thead>
+            <tbody>
+                @foreach (var client in Clients)
+                {
+                    <tr data-toggle="collapse" class="clickable"
+                    onclick="document.getElementById('client_@(client.Id)_detail').classList.toggle('collapse');">
+                        <td>@client.Name</td>
+                        <td>@client.Barcode</td>
+                        <td>
+                            <button class="mr-2 btn btn-primary">
+                                <span class="mr-2 oi oi-pencil" aria-hidden="true"></span>Edit
+                            </button>
+                            <button class="mr-2 btn btn-success" @onclick="(() => SellMembershipTo(client))">
+                                <span class="mr-2 oi oi-dollar" aria-hidden="true"></span>Sell
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-0" colspan="3">
+                            <div id="client_@(client.Id)_detail" class="collapse m-3">
+                                <ClientMembershipListComponent Client="client" />
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a href="#" class="btn btn-primary">Go somewhere</a>
+    </div>
 </div>
 
 @code {
 
-  public List<Client> Clients { get; set; } = new List<Client>();
+    public List<Client> Clients { get; set; } = new List<Client>();
+    [CascadingParameter] public IModalService ModalService { get; set; }
 
-  protected override async Task OnInitializedAsync()
-  {
-    this.Clients = await DataService.GetClientsAsync();
-    StateHasChanged();
-  }
+    protected override async Task OnInitializedAsync()
+    {
+        this.Clients = await DataService.GetClientsAsync();
+        StateHasChanged();
+    }
+
+    private async Task SellMembershipTo(Client client)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Client", client);
+
+        if (!(await ModalService.Show<PassSellComponent>("Sell membership", parameters).Result).Cancelled)
+        {
+            @* await this.GetPasses(); *@
+        }
+    }
 }

@@ -11,7 +11,6 @@ namespace DataAccessLayer.Models
         public Pass()
         {
             ClientPasses = new HashSet<ClientPass>();
-            Entries = new HashSet<Entry>();
         }
 
         public int Id { get; set; }
@@ -29,6 +28,5 @@ namespace DataAccessLayer.Models
         public bool IsDeleted { get; set; }
 
         public virtual ICollection<ClientPass> ClientPasses { get; set; }
-        public virtual ICollection<Entry> Entries { get; set; }
     }
 }

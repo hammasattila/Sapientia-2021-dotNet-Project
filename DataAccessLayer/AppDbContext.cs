@@ -136,13 +136,13 @@ namespace DataAccessLayer
                 entity.HasOne(d => d.Gym)
                     .WithMany(p => p.Entries)
                     .HasForeignKey(d => d.GymId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.ClientCascade)
                     .HasConstraintName("FK__Entries__GymId__282DF8C2");
 
-                entity.HasOne(d => d.Pass)
+                entity.HasOne(d => d.ClientPass)
                     .WithMany(p => p.Entries)
-                    .HasForeignKey(d => d.PassId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasForeignKey(d => d.ClientPassId)
+                    .OnDelete(DeleteBehavior.ClientCascade)
                     .HasConstraintName("FK__Entries__PassId__2739D489");
             });
 

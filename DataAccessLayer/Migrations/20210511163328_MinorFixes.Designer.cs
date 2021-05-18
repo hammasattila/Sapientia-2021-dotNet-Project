@@ -4,14 +4,16 @@ using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210511163328_MinorFixes")]
+    partial class MinorFixes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,9 +140,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ClientPassId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("EntryDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -149,13 +148,16 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("GymId")
                         .HasColumnType("int");
 
+                    b.Property<int>("PassId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("ClientPassId");
-
                     b.HasIndex("GymId");
+
+                    b.HasIndex("PassId");
 
                     b.ToTable("Entries");
                 });
@@ -452,28 +454,25 @@ namespace DataAccessLayer.Migrations
                         .WithMany("Entries")
                         .HasForeignKey("ClientId")
                         .HasConstraintName("FK__Entries__ClientI__2645B050")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.HasOne("DataAccessLayer.Models.ClientPass", "ClientPass")
-                        .WithMany("Entries")
-                        .HasForeignKey("ClientPassId")
-                        .HasConstraintName("FK__Entries__PassId__2739D489")
-                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("DataAccessLayer.Models.Gym", "Gym")
                         .WithMany("Entries")
                         .HasForeignKey("GymId")
                         .HasConstraintName("FK__Entries__GymId__282DF8C2")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccessLayer.Models.Pass", "Pass")
+                        .WithMany("Entries")
+                        .HasForeignKey("PassId")
+                        .HasConstraintName("FK__Entries__PassId__2739D489")
                         .IsRequired();
 
                     b.Navigation("Client");
 
-                    b.Navigation("ClientPass");
-
                     b.Navigation("Gym");
+
+                    b.Navigation("Pass");
                 });
 
             modelBuilder.Entity("DataAccessLayer.Models.Pass", b =>
@@ -545,11 +544,6 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Entries");
                 });
 
-            modelBuilder.Entity("DataAccessLayer.Models.ClientPass", b =>
-                {
-                    b.Navigation("Entries");
-                });
-
             modelBuilder.Entity("DataAccessLayer.Models.Gym", b =>
                 {
                     b.Navigation("Entries");
@@ -558,6 +552,8 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("DataAccessLayer.Models.Pass", b =>
                 {
                     b.Navigation("ClientPasses");
+
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }
