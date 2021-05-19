@@ -2,14 +2,8 @@
 @using Microsoft.AspNetCore.Authorization;
 @inject FitnessDataService DataService;
 
-<AuthorizeView Roles="Admin">
-    <Authorized>
-        <PassListComponent Passes="Passes" EditPassCallback="EditPass" />
-    </Authorized>
-    <NotAuthorized>
-        <p>You are not an Administrator</p>
-    </NotAuthorized>
-</AuthorizeView>
+<Title value="Fitness - Memberships" />
+<PassListComponent Passes="Passes" EditPassCallback="EditPass" />
 
 @code {
 

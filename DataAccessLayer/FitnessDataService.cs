@@ -33,6 +33,34 @@ namespace DataAccessLayer
                     .ToListAsync();
             }
         }
+
+        public async Task<List<Client>> FindCLientsByBarcodeOrName(string searchTerm)
+        {
+            using (var db = new AppDbContext())
+            {
+                List<Client> resultByBarcode = await db.Clients
+                    .Where(client => client.Barcode.Contains(searchTerm))
+                    .ToListAsync();
+
+                List<Client> resultByName = await db.Clients
+                    .Where(client => client.Name.Contains(searchTerm))
+                    .ToListAsync();
+
+                return resultByBarcode.Concat(resultByName).ToList();
+            }
+        }
+
+        public Task<bool> UpdateClientAsync(Client client)
+        {
+
+            using (var db = new AppDbContext())
+            {
+                var res = db.Clients.Update(client);
+                db.SaveChanges();
+            }
+
+            return Task.FromResult(true);
+        }
         #endregion
 
         #region Gyms
@@ -98,7 +126,7 @@ namespace DataAccessLayer
             return true;
         }
 
-        public async Task<bool> UpdatePassAsync(Pass pass)
+        public Task<bool> UpdatePassAsync(Pass pass)
         {
 
             using (var db = new AppDbContext())
@@ -107,7 +135,7 @@ namespace DataAccessLayer
                 db.SaveChanges();
             }
 
-            return true;
+            return Task.FromResult(true);
         }
         #endregion
 
@@ -128,6 +156,14 @@ namespace DataAccessLayer
             return true;
         }
 
+        public Task<ClientPass> GetMembershipById(int id)
+        {
+            using (var db = new AppDbContext())
+            {
+                return Task.FromResult(db.ClientPasses.Where(m => m.Id == id).First());
+            }
+        }
+
         public async Task<List<ClientPass>> GetValidClientMebershipsFor(int clientId)
         {
             using (var db = new AppDbContext())
@@ -135,9 +171,23 @@ namespace DataAccessLayer
                 return await db.ClientPasses
                     .Where(m => (m.ClientId == clientId) && (m.IsValid == true))
                     .Include(m => m.Pass)
+                    .Include(m => m.Client)
                     .ToListAsync();
             }
         }
+
+        public async Task<List<ClientPass>> GetValidMebershipsByBarcode(string barcode)
+        {
+            using (var db = new AppDbContext())
+            {
+                return await db.ClientPasses
+                    .Where(m => (m.Barcode.Contains(barcode)) && (m.IsValid == true))
+                    .Include(m => m.Pass)
+                    .Include(m => m.Client)
+                    .ToListAsync();
+            }
+        }
+
         #endregion
 
         #region Enteries
@@ -187,7 +237,7 @@ namespace DataAccessLayer
                     return $"Valid only after {membershipType.ValidUntil}!";
                 }
 
-                if (currentGym != 0 && membershipType.ValidForGymId != 0 && membershipType.ValidForGymId == currentGym)
+                if (currentGym != 0 && membershipType.ValidForGymId != 0 && membershipType.ValidForGymId != currentGym)
                 {
                     return "Mebership is not valid for this gym!";
                 }
@@ -200,9 +250,33 @@ namespace DataAccessLayer
                 };
 
                 await db.Entries.AddAsync(entery);
+
+                var pass = db.ClientPasses.Where(m => m.Id == membership.Id).First();
+                if(pass.FirstUsedAt == null)
+                {
+                    pass.FirstUsedAt = DateTime.Now;
+                    db.ClientPasses.Update(pass);
+                }
+
                 await db.SaveChangesAsync();
 
                 return String.Empty;
+            }
+        }
+        #endregion
+
+        #region Stats
+        public async Task<List<GymStat>> GetStatisticsAsync()
+        {
+            using (var db = new AppDbContext())
+            {
+                return await db.Gyms
+                    .Include(g => g.Entries)
+                    .Select(g => new GymStat()
+                    {
+                        Name = g.Name,
+                        Enteries = g.Entries.Count
+                    }).ToListAsync();
             }
         }
         #endregion

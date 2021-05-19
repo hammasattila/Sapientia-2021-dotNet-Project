@@ -1,47 +1,13 @@
 @inject FitnessDataService DataService
-@inject IJSRuntime JSRuntime;
 
-<table class="table m-0">
-    <thead>
-        <th>Barcode</th>
-        <th>Type</th>
-        <th></th>
-    </thead>
-    <tbody>
-        @foreach (var membership in Memebrships ?? Enumerable.Empty<ClientPass>())
-        {
-            <tr data-toggle="collapse">
-                <td>@membership.Barcode</td>
-                <td>@membership.Pass.Name</td>
-                <td>
-                    <button class="mr-2 btn btn-success" @onclick="@(() => Enter(membership))">
-                        <span class="mr-2 oi oi-account-login" aria-hidden="true"></span>Enter
-                    </button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<MembershipListComponent Memberships="Memberships" />
 
 @code {
     [Parameter] public Client Client { get; set; }
-    List<ClientPass> Memebrships { get; set; }
+    List<ClientPass> Memberships { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        this.Memebrships = await DataService.GetValidClientMebershipsFor(this.Client.Id);
-    }
-
-    private async Task Enter(ClientPass membership)
-    {
-        var error = await DataService.Enter(membership);
-        if(!String.IsNullOrEmpty(error))
-        {
-            await JSRuntime.InvokeVoidAsync("alert", error);
-        }
-        else
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Succesfuly entered!");
-        }
+        this.Memberships = await DataService.GetValidClientMebershipsFor(this.Client.Id);
     }
 }

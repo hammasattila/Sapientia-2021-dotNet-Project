@@ -150,6 +150,11 @@ CLI Tools:
 
 ## Results
 
+![Dashboard](./Docs/localhost_5001_.png)
+![Dashboard](./Docs/localhost_5001_%20(1).png)
+![Dashboard](./Docs/localhost_5001_%20(2).png)
+![Dashboard](./Docs/localhost_5001_%20(3).png)
+
 ## Resources
 
 1. [Build a web app with Blazor WebAssembly and Visual Studio Code](https://docs.microsoft.com/en-us/learn/modules/build-blazor-webassembly-visual-studio-code/)
@@ -167,3 +172,5 @@ CLI Tools:
 7. [**Microsoft bulshit**: email should be checked with email column](https://stackoverflow.com/questions/50089448/cant-login-with-created-user-in-net-core-2-0)
 
 8. [A Simple Blazor User and Role Manager](https://blazorhelpwebsite.com/ViewBlogPost/21)
+
+9. [Icons](https://useiconic.com/open)

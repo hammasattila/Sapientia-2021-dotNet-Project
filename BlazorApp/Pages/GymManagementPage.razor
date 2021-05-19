@@ -1,6 +1,7 @@
 @page "/gyms"
 @inject FitnessDataService DataService;
 
+<Title value="Fitness - Gyms" />
 <AuthorizeView Roles="Admin, User">
     <Authorized>
         <GymListComponent Gyms="Gyms" EditGymCallback="EditGym" />

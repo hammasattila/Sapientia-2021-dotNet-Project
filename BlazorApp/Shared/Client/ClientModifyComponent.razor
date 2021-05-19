@@ -1,73 +1,102 @@
 @using System.Text.Json
+@inject FitnessDataService DataService;
 @inject IJSRuntime JSRuntime;
 
 <div class="card m-3">
-    <h4 class="card-header">Add client</h4>
+    <h4 class="card-header">Add Client</h4>
     <div class="card-body">
-        <EditForm EditContext="@editContext" OnValidSubmit="AddClientAsync" @onreset="InitModel">
+        <EditForm EditContext="@ClientEditContext" OnValidSubmit="AddClientAsync" @onreset="InitModel">
             <DataAnnotationsValidator />
             <div class="form-row">
-                <div class="form-group col-6">
+                <div class="form-group col-12 col-md-6">
                     <label>Name</label>
-                    <InputText @bind-Value="client.Name" class="form-control" />
-                    <ValidationMessage For="@(() => client.Name)" />
+                    <InputText @bind-Value="EditableClient.Name" class="form-control" />
+                    <ValidationMessage For="@(() => EditableClient.Name)" />
                 </div>
-                <div class="form-group col-6">
+                <div class="form-group col-12 col-md-6">
                     <label>Phone number</label>
-                    <InputText @bind-Value="client.Phone" class="form-control" />
-                    <ValidationMessage For="@(() => client.Phone)" />
+                    <InputText @bind-Value="EditableClient.Phone" class="form-control" />
+                    <ValidationMessage For="@(() => EditableClient.Phone)" />
                 </div>
-                    <div class="form-group col-6">
+                    <div class="form-group col-12 col-md-6">
                     <label>Email address</label>
-                    <InputText @bind-Value="client.Email" class="form-control" />
-                    <ValidationMessage For="@(() => client.Email)" />
+                    <InputText @bind-Value="EditableClient.Email" class="form-control" />
+                    <ValidationMessage For="@(() => EditableClient.Email)" />
                 </div>
-                <div class="form-group col-6">
+                <div class="form-group col-12 col-md-6">
                     <label>Id card's serial number</label>
-                    <InputText @bind-Value="client.IdCardNr" class="form-control" />
-                    <ValidationMessage For="@(() => client.IdCardNr)" />
-                </div>
-                <div class="form-group col-6">
-                    <label>Barcode for the client</label>
-                    <InputText @bind-Value="client.Barcode" class="form-control" />
-                    <ValidationMessage For="@(() => client.Barcode)" />
+                    <InputText @bind-Value="EditableClient.IdCardNr" class="form-control" />
+                    <ValidationMessage For="@(() => EditableClient.IdCardNr)" />
                 </div>
                 <div class="form-group col-12">
                     <label>Notes</label>
-                    <InputText @bind-Value="client.Notes" class="form-control" />
-                    <ValidationMessage For="@(() => client.Notes)" />
+                    <InputTextArea @bind-Value="Client.Notes" class="form-control" />
+                    <ValidationMessage For="@(() => Client.Notes)" />
                 </div>
             </div>
+            <ValidationSummary />
             <div class="text-center">
-                <button type="submit" class="btn btn-primary mr-1">Register</button>
-                <button type="reset" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary mr-2">Save</button>
+                <button type="reset" class="btn btn-secondary mr-2">Cancel</button>
             </div>
+            
         </EditForm>
     </div>
 </div>
 
 @code {
-    private Client client;
-    private EditContext editContext;
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public Client Client { get; set; }
 
-    FitnessDataService ds;
+    private Client EditableClient { get; set; }
+    private EditContext ClientEditContext;
 
     protected override void OnInitialized()
     {
-        ds = new FitnessDataService();
+        DataService = new FitnessDataService();
         this.InitModel();
     }
 
     private void InitModel() {
-        client = new Client();
-        editContext = new EditContext(client);
+        this.EditableClient = new Client()
+        {
+            Id = this.Client.Id,
+            InsertedAt = this.Client.InsertedAt,
+            Barcode = this.Client.Barcode,
+            Email = this.Client.Email,
+            IdCardNr = this.Client.IdCardNr,
+            IsDeleted = this.Client.IsDeleted,
+            Name = this.Client.Name,
+            Phone = this.Client.Phone,
+            Notes = this.Client.Notes
+        };
+
+        ClientEditContext = new EditContext(EditableClient);        
     }
 
     private async void AddClientAsync()
     {
-        var clientJson = JsonSerializer.Serialize(client, new JsonSerializerOptions { WriteIndented = true });
-        await JSRuntime.InvokeVoidAsync("alert", $"SUCCESS!! :-)\n\n{clientJson}");
+        string error = null;
 
-        await ds.TryAddClientAsync(client);
+        if (this.EditableClient.Id != 0)
+        {
+            await DataService.UpdateClientAsync(this.EditableClient);
+        }
+        else
+        {
+            if (!await DataService.TryAddClientAsync(this.EditableClient))
+            {
+                error = "Create error";
+            }
+        }
+
+        if (!String.IsNullOrEmpty(error))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", error);
+        }
+        else
+        {
+            await ModalInstance.CloseAsync(ModalResult.Ok<int>(this.Client.Id == 0 ? EditableClient.Id: 0));
+        }
     }
 }

@@ -9,5 +9,6 @@
     <!-- Default user settings -->
     <add key="default_admin_usr" value="admin@fitness.com" />
     <add key="default_admin_pwd" value="admin" />
+    <add key="gym" value="0" />
   </appSettings>
 </configuration>

@@ -1,6 +1,49 @@
+@inject FitnessDataService DataService
+@inject IJSRuntime JSRuntime;
 
+<table class="table m-0">
+    <thead>
+        <th>Barcode</th>
+        <th>Type</th>
+        <th>First used</th>
+        <th colspan="2">Client</th>
+        <th>Actions</th>
+    </thead>
+    <tbody>
+        @foreach (var membership in Memberships ?? Enumerable.Empty<ClientPass>())
+        {
+            <tr data-toggle="collapse">
+                <td>@membership.Barcode</td>
+                <td>@membership.Pass?.Name</td>
+                <td>@(membership.FirstUsedAt != null ? membership.FirstUsedAt : "-")</td>
+                <td>@membership.Client?.Name</td>
+                <td>@membership.Client?.IdCardNr</td>
 
+                <td>
+                    <button class="mr-2 btn btn-success" @onclick="@(() => Enter(membership))">
+                        <span class="mr-2 oi oi-account-login" aria-hidden="true"></span>Enter
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
     [Parameter] public List<ClientPass> Memberships { get; set; }
+
+    private async Task Enter(ClientPass membership)
+    {
+        var error = await DataService.Enter(membership);
+
+        if (!String.IsNullOrEmpty(error))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", error);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Succesfuly entered!");
+        }
+
+    }
 }
