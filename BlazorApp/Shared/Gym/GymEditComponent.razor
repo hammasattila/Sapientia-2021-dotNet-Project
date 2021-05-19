@@ -1,0 +1,80 @@
+@inject FitnessDataService DataService;
+@inject IJSRuntime JSRuntime;
+
+<EditForm EditContext="@GymEditContext" OnValidSubmit="SaveGym" @onreset="InitModel">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-12">
+            <label>Name</label>
+            <InputText @bind-Value="Gym.Name" class="form-control" />
+            <ValidationMessage For="@(() => Gym.Name)" />
+        </div>
+    </div>
+    <ValidationSummary />
+    <div class="text-center">
+        <button type="submit" class="btn btn-success mr-2">Save</button>
+        <button type="reset" class="btn btn-secondary mr-2">Reset</button>
+        @if (Gym.Id != 0)
+        {
+            @if (Gym.IsDeleted)
+            {
+                <button type="button" class="btn btn-primary mr-2" @onclick="DeleteOrRestoreGym">
+                    <span class="mr-2 oi oi-reload" aria-hidden="true"></span>Restore
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-danger mr-2" @onclick="DeleteOrRestoreGym">
+                    <span class="mr-2 oi oi-trash" aria-hidden="true"></span>Delete
+                </button>
+            }
+        }
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public Gym Gym { get; set; }
+    private EditContext GymEditContext { get; set; }
+    protected override void OnInitialized()
+    {
+        this.InitModel();
+    }
+
+    private void InitModel()
+    {
+        this.GymEditContext = new EditContext(this.Gym);
+    }
+
+    private async Task SaveGym()
+    {
+        string error = null;
+
+        if (this.Gym.Id != 0)
+        {
+            await DataService.UpdateGymAsync(this.Gym);
+        }
+        else
+        {
+            if (!await DataService.TryAddGymAsync(this.Gym))
+            {
+                error = "Create error";
+            }
+        }
+
+        if (!String.IsNullOrEmpty(error))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", error);
+        }
+        else
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+
+    private async Task DeleteOrRestoreGym()
+    {
+        this.Gym.IsDeleted = !this.Gym.IsDeleted;
+        await this.SaveGym();
+    }
+}

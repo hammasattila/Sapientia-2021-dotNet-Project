@@ -7,25 +7,41 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
+        <AuthorizeView>
+            <Authorized>
+                @foreach (var item in menuItems)
+                {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="@item.path" Match="NavLinkMatch.All">
+                        <span class="oi oi-@item.icon" aria-hidden="true"></span> @item.label
+                    </NavLink>
+                </li>
+                }
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="administration" Match="NavLinkMatch.All">
+                    <span class="oi oi-people" aria-hidden="true"></span> User management
+                </NavLink>
+            </li>
+        </AuthorizeView>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+            <NavLink class="nav-link" href="about" Match="NavLinkMatch.All">
+                <span class="oi oi-info" aria-hidden="true"></span> About
             </NavLink>
         </li>
     </ul>
 </div>
 
 @code {
+    private (string icon, string path, string label)[] menuItems = {
+("dashboard", "", "Dashboard"),
+("people", "clients", "Clients"),
+("layers", "memberships", "Passes"),
+("map", "gyms", "Gyms"),
+};
+
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;

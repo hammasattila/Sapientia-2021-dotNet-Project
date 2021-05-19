@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 #nullable disable
 
@@ -13,7 +13,7 @@ namespace DataAccessLayer.Models
         }
 
         public int Id { get; set; }
-        public string Name { get; set; }
+        [Required] public string Name { get; set; }
         public bool IsDeleted { get; set; }
 
         public virtual ICollection<Entry> Entries { get; set; }

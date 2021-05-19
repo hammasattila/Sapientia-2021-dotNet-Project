@@ -1,0 +1,81 @@
+@page "/"
+@inject FitnessDataService DataService;
+
+<Title value="Fitness - Dashboard" />
+
+<AuthorizeView Roles="Admin, User">
+    <Authorized>
+        <div class="card">
+            <div class="card-body">
+                <div class="form-row mb-2">
+                    <div class="form-group col-12">
+                        <label>Barcode</label>
+                        <input class="form-control" @bind-value="Barcode" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <MembershipListComponent Memberships="Meberships" />
+            </div>
+        </div>
+
+        <AuthorizeView Context="StatAuth" Roles="Admin">
+            <div class="card mt-5">
+                <div class="card-body">
+                <h4 class="card-title">Stats</h4>
+                    <table  class="table m-0">
+                        <thead>
+                            <th>Gym</th>
+                            <th>Enteries</th>
+                        </thead>
+                        <tbody>
+                            @foreach (var gym in Stats ?? Enumerable.Empty<GymStat>())
+                            {
+                                <tr>
+                                    <td>@gym.Name</td>
+                                    <td>@gym.Enteries</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </AuthorizeView>
+    </Authorized>
+    <NotAuthorized>
+        <a href="Identity/Account/Login">Login</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string barcode = "";
+    private List<ClientPass> Meberships { get; set; }
+    private List<GymStat> Stats { get; set; }
+    private string Barcode
+    {
+        get
+        {
+            return this.barcode;
+        }
+
+        set
+        {
+            this.barcode = value;
+            this.GetMeberships().ConfigureAwait(false);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Stats = await DataService.GetStatisticsAsync();
+        this.Barcode = "";
+    }
+
+    private async Task GetMeberships()
+    {
+        this.Meberships = await DataService.GetValidMebershipsByBarcode(barcode);
+        StateHasChanged();
+    }
+
+
+
+
+}

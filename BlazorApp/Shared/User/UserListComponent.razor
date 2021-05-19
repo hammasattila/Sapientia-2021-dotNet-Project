@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Identity
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Client list</h4>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>User Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Users ?? Enumerable.Empty<IdentityUser>())
+                {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="(() => EditUserCallback.InvokeAsync(user))">
+                                    <span class="mr-2 oi oi-pencil" aria-hidden="true"></span>Edit
+                                </button>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                <button class="btn btn-success"
+                    @onclick="(() => EditUserCallback.InvokeAsync(new IdentityUser() { Id = String.Empty }))">Add
+                    User</button>
+            </Authorized>
+            <NotAuthorized>
+                You are not an admin.
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<IdentityUser> Users { get; set; }
+    [Parameter] public EventCallback<IdentityUser> EditUserCallback { get; set; }
+}

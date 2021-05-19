@@ -1,0 +1,54 @@
+@inject FitnessDataService DataService;
+@page "/clients"
+@using Microsoft.AspNetCore.Components.Web.Extensions.Head
+<Title value="Fitness - Clients" />
+
+<ClientListComponent Clients="Clients" EditClientCallback="EditClient" SellMembershipCallback="SellMembershipTo" />
+
+
+@code {
+    private List<Client> Clients { get; set; }
+    [CascadingParameter] public IModalService ModalService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.GetClients();
+    }
+
+    private async Task GetClients()
+    {
+        this.Clients = await DataService.GetClientsAsync();
+        StateHasChanged();
+    }
+
+    private async Task EditClient(Client client)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Client", client);
+
+        var result = await ModalService.Show<ClientModifyComponent>(client.Id == 0 ? "Add client" :"Edit client", parameters).Result;
+        if (!result.Cancelled)
+        {
+            await this.GetClients();
+            int id = (int)result.Data;
+            if (id != 0)
+            {
+                client = this.Clients.Where(c => c.Id == id).First();
+                await this.SellMembershipTo(client);
+            }
+        }
+    }
+
+    private async Task SellMembershipTo(Client client)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Client", client);
+
+        if (!(await ModalService.Show<PassSellComponent>("Sell membership", parameters).Result).Cancelled)
+        {
+            this.Clients = null;
+            StateHasChanged();
+            await this.GetClients();
+        }
+    }
+}

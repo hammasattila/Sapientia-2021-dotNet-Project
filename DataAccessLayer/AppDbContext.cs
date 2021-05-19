@@ -1,18 +1,23 @@
 ﻿using System;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using DataAccessLayer.Models;
+using Microsoft.AspNetCore.Identity;
 #nullable disable
 
-namespace DataAccessLayer.Models
+namespace DataAccessLayer
 {
-    public partial class FitnessContext : DbContext
+    public partial class AppDbContext : IdentityDbContext
     {
-        public FitnessContext()
+
+        public string ConnectionString { get; set; }
+
+        public AppDbContext()
         {
         }
 
-        public FitnessContext(DbContextOptions<FitnessContext> options)
-            : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
@@ -26,16 +31,22 @@ namespace DataAccessLayer.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string server = ConfigurationManager.AppSettings.Get("server");
-                string database = ConfigurationManager.AppSettings.Get("database");
-                string user = ConfigurationManager.AppSettings.Get("user");
-                string pwd = ConfigurationManager.AppSettings.Get("pwd");
-                optionsBuilder.UseSqlServer($"server='{server}';database={database};user={user};pwd='{pwd}';");
+                if (String.IsNullOrEmpty(this.ConnectionString))
+                {
+                    string server = ConfigurationManager.AppSettings.Get("server");
+                    string database = ConfigurationManager.AppSettings.Get("database");
+                    string user = ConfigurationManager.AppSettings.Get("user");
+                    string pwd = ConfigurationManager.AppSettings.Get("pwd");
+                    this.ConnectionString = $"server='{server}';database={database};user={user};pwd='{pwd}';";
+                }
+                optionsBuilder.UseSqlServer(this.ConnectionString);
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
             modelBuilder.Entity<Client>(entity =>
@@ -125,13 +136,13 @@ namespace DataAccessLayer.Models
                 entity.HasOne(d => d.Gym)
                     .WithMany(p => p.Entries)
                     .HasForeignKey(d => d.GymId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.ClientCascade)
                     .HasConstraintName("FK__Entries__GymId__282DF8C2");
 
-                entity.HasOne(d => d.Pass)
+                entity.HasOne(d => d.ClientPass)
                     .WithMany(p => p.Entries)
-                    .HasForeignKey(d => d.PassId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasForeignKey(d => d.ClientPassId)
+                    .OnDelete(DeleteBehavior.ClientCascade)
                     .HasConstraintName("FK__Entries__PassId__2739D489");
             });
 

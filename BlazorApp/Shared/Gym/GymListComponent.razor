@@ -1,0 +1,45 @@
+<div class="card">
+    <div class="card-body">
+        <AuthorizeView Roles="Admin, User">
+            <Authorized>
+                <h4 class="card-title">Gym management</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var gym in Gyms ?? Enumerable.Empty<Gym>())
+                        {
+                        <tr class="@(gym.IsDeleted ? "bg-danger" : "" )">
+                            <td>@gym.Id</td>
+                            <td>@gym.Name</td>
+                            <td>
+                                <AuthorizeView Context="EditAuthorization" Roles="Admin">
+                                    <button class="btn btn-primary" @onclick="(() => EditGymCallback.InvokeAsync(gym))">
+                                        <span class="mr-2 oi oi-pencil" aria-hidden="true"></span>Edit
+                                    </button>
+                                </AuthorizeView>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                <button class="btn btn-success" @onclick="(() => EditGymCallback.InvokeAsync(new Gym()))">
+                    Add Membership Type
+                </button>
+            </Authorized>
+            <NotAuthorized>
+                <a href="Identity/Account/Login">Login</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<Gym> Gyms { get; set; }
+    [Parameter] public EventCallback<Gym> EditGymCallback { get; set; }
+}

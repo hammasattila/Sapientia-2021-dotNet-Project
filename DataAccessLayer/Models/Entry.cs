@@ -9,12 +9,12 @@ namespace DataAccessLayer.Models
     {
         public int Id { get; set; }
         public int ClientId { get; set; }
-        public int PassId { get; set; }
-        public int GymId { get; set; }
+        public int ClientPassId { get; set; }
+        public int? GymId { get; set; }
         public DateTime EntryDate { get; set; }
 
         public virtual Client Client { get; set; }
         public virtual Gym Gym { get; set; }
-        public virtual Pass Pass { get; set; }
+        public virtual ClientPass ClientPass { get; set; }
     }
 }

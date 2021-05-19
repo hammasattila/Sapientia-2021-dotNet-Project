@@ -1,0 +1,67 @@
+@inject FitnessDataService DataService;
+@inject IJSRuntime JSRuntime;
+
+<EditForm EditContext="@SellMembershipEditContext" OnValidSubmit="Sell" @onreset="InitModel">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-12">
+            <label>Client name</label>
+            <input type="text" value="@Client.Name" class="form-control" disabled />
+        </div>
+        <div class="form-group col-12">
+            <InputSelect @bind-Value="SellMembership.PassId" class="form-control">
+                <option value="0">
+                    Select a membership type.
+                </option>
+                @foreach (var membership in Memberships ?? Enumerable.Empty<Pass>())
+                {
+                    <option value="@membership.Id">
+                        @membership.Name
+                    </option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => SellMembership.PassId)" />
+        </div>
+        <ValidationSummary />
+    </div>
+    <div class="text-center">
+        <button type="submit" class="mr-2 btn btn-success">Sell</button>
+        <button type="reset" class="mr-2 btn btn-secondary">Reset</button>
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    private ClientPass SellMembership { get; set; }
+    private EditContext SellMembershipEditContext { get; set; }
+    [Parameter] public Client Client { get; set; }
+    private List<Gym> Gyms { get; set; }
+    private List<Pass> Memberships { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.InitModel();
+        this.Gyms = await DataService.GetGymsAsync();
+        this.Memberships = await DataService.GetPassesAsync();
+    }
+
+    private void InitModel()
+    {
+        this.SellMembership = new ClientPass() { ClientId = this.Client.Id };
+        this.SellMembershipEditContext = new EditContext(this.SellMembership);
+    }
+
+    private async Task Sell()
+    {
+        @* SellMembership.Pass = Memberships.Where(m => m.Id == SellMembership.PassId).First(); *@
+        if (!await DataService.TryAddClientMembershipAsync(SellMembership))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Something went wrong!");
+        }
+        else
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+}

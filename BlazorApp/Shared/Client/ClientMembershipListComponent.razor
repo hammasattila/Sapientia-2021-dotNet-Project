@@ -1,0 +1,13 @@
+@inject FitnessDataService DataService
+
+<MembershipListComponent Memberships="Memberships" />
+
+@code {
+    [Parameter] public Client Client { get; set; }
+    List<ClientPass> Memberships { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Memberships = await DataService.GetValidClientMebershipsFor(this.Client.Id);
+    }
+}

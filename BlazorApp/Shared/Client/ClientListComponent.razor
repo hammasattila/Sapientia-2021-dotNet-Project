@@ -1,0 +1,130 @@
+@inject FitnessDataService DataService
+
+<div class="card">
+    <div class="card-body">
+        <AuthorizeView Roles="Admin, User">
+            <Authorized>
+                <h4 class="card-title">Client list</h4>
+                <div class="form-row mb-2">
+                    <div class="form-group col-12">
+                        <label>Search for Client.</label>
+                        <input class="form-control" @bind-value="SearchTerm" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <th>Name</th>
+                        <th>Barcode</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        @foreach (var client in FilteredClients ?? Enumerable.Empty<Client>())
+                        {
+                            <tr data-toggle="collapse" class="clickable">
+                                <td>@client.Name</td>
+                                <td>@client.Barcode</td>
+                                <td>
+                                    <button class="mr-2 btn btn-primary"
+                                    @onclick="(() => EditClientCallback.InvokeAsync(client))">
+                                        <span class="mr-2 oi oi-pencil" aria-hidden="true"></span>Edit
+                                    </button>
+                                    <button class="mr-2 btn btn-success"
+                                    @onclick="(() => SellMembershipCallback.InvokeAsync(client))">
+                                        <span class="mr-2 oi oi-dollar" aria-hidden="true"></span>Sell
+                                    </button>
+                                    <button class="mr-2 btn btn-secondary"
+                                    onclick="document.getElementById('client_@(client.Id)_detail').classList.toggle('collapse');">
+                                        <span class="mr-2 oi oi-info" aria-hidden="true"></span>Info
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-0" colspan="3">
+                                    <div id="client_@(client.Id)_detail" class="collapse m-3">
+                                        <ClientMembershipListComponent Client="client" />
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="text-center">
+                    <button class="btn btn-success" @onclick="(() => EditClientCallback.InvokeAsync(new Client()))">
+                        Add Client
+                    </button>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <a href="Identity/Account/Login">Login</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+@code {
+
+    private List<Client> clients;
+
+    [Parameter] public List<Client> Clients
+    {
+        get
+        {
+            return this.clients;
+        }
+        
+        set
+        {
+            this.clients = value;
+            this.FilterClients();
+        }
+    }
+
+    private List<Client> FilteredClients { get; set; }
+
+    [Parameter] public EventCallback<Client> EditClientCallback { get; set; }
+
+    [Parameter] public EventCallback<Client> SellMembershipCallback { get; set; }
+
+    [CascadingParameter] public IModalService ModalService { get; set; }
+
+    private string searchTerm = "";
+
+    private string SearchTerm
+    {
+        get
+        {
+            return this.searchTerm;
+        }
+
+        set
+        {
+            this.searchTerm = value;
+            this.FilterClients().ConfigureAwait(false);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        this.SearchTerm = "";
+        this.FilteredClients = this.Clients;
+    }
+
+    private Task FilterClients()
+    {
+        this.FilteredClients = null;
+        StateHasChanged();
+
+        if(String.IsNullOrEmpty(searchTerm)) {
+            this.FilteredClients = this.Clients;
+            StateHasChanged();
+            return Task.CompletedTask;
+        }
+
+        this.FilteredClients = this.Clients
+            .Where(client => client.Barcode.Contains(searchTerm) || client.Name.Contains(searchTerm))
+            .ToList();
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,50 @@
+<div class="card">
+    <div class="card-body">
+        <AuthorizeView Roles="Admin, User">
+            <Authorized>
+                <h4 class="card-title">Passes</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pass in Passes ?? Enumerable.Empty<Pass>())
+                {
+                        <tr class="@(pass.IsDeleted ? "bg-danger" : "" )">
+                            <td>@pass.Id</td>
+                            <td>@pass.Name</td>
+                            <td>@pass.Price</td>
+                            <td>
+                                <AuthorizeView Context="EditAuthorization" Roles="Admin">
+                                    <button class="btn btn-primary"
+                                        @onclick="(() => EditPassCallback.InvokeAsync(pass))">
+                                        <span class="mr-2 oi oi-pencil" aria-hidden="true"></span>Edit
+                                    </button>
+                                </AuthorizeView>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                <AuthorizeView Context="EditAuthorization" Roles="Admin">
+                    <button class="btn btn-success" @onclick="(() => EditPassCallback.InvokeAsync(new Pass()))">
+                        Add Membership Type
+                    </button>
+                </AuthorizeView>
+            </Authorized>
+            <NotAuthorized>
+                <a href="Identity/Account/Login">Login</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<Pass> Passes { get; set; }
+    [Parameter] public EventCallback<Pass> EditPassCallback { get; set; }
+}
